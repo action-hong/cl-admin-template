@@ -19,3 +19,20 @@ export default function checkPermission(value) {
     return false
   }
 }
+
+/**
+ *
+ * @param {ACModules[]} list
+ * @param {string[]} res
+ */
+export function flapPermissions(list, res = []) {
+  if (list && list.length > 0) {
+    list.forEach(item => {
+      item.aclList.forEach(acl => {
+        res.push(acl.url)
+      })
+      flapPermissions(item.aclModuleList, res)
+    })
+  }
+  return res
+}

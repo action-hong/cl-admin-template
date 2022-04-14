@@ -143,12 +143,6 @@ const asyncRoutes = [
         meta: { title: 'Tinymce' }
       },
       {
-        path: 'markdown',
-        component: 'views/components-demo/markdown',
-        name: 'MarkdownDemo',
-        meta: { title: 'Markdown' }
-      },
-      {
         path: 'json-editor',
         component: 'views/components-demo/json-editor',
         name: 'JsonEditorDemo',

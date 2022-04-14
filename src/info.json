@@ -1,0 +1,143 @@
+{
+  "status": 0,
+  "msg": "查询成功",
+  "data": {
+    "sysUser": {
+      "id": "bb59e45ad244478cb69fa5ee051f2ba9",
+      "username": "洪英旋",
+      "telephone": "15906098399",
+      "mail": "kkopite.hong@smartcorelink.com",
+      "password": "25D55AD283AA400AF464C76D713C07AD",
+      "deptKeyid": "83a4c890421e4c469cc7fb7c16bcd567",
+      "remark": "给了超级管理员权限",
+      "operator": "测试3",
+      "operateTime": "2022-04-14T07:00:25.000+00:00",
+      "createTime": null,
+      "updateTime": null,
+      "operateIp": "117.28.155.239",
+      "status": 1
+    },
+    "aclLists": [
+      {
+        "id": "91405700674b4bbdaa6283e7b9d3f77e",
+        "name": "权限模块1",
+        "parentId": "0",
+        "level": "0",
+        "seq": 0,
+        "remark": "测试用，权限模块1",
+        "operator": "测试3",
+        "operateTime": "2022-04-01T11:03:01.000+00:00",
+        "createTime": "2022-04-01T11:03:01.000+00:00",
+        "updateTime": null,
+        "operateIp": "127.0.0.1",
+        "status": 1,
+        "aclModuleList": [
+          {
+            "id": "31feda46da3f4fff862b2d3a5f234174",
+            "name": "权限模块11",
+            "parentId": "91405700674b4bbdaa6283e7b9d3f77e",
+            "level": "0.91405700674b4bbdaa6283e7b9d3f77e",
+            "seq": 0,
+            "remark": "测试用，权限模块11",
+            "operator": "测试3",
+            "operateTime": "2022-04-01T11:03:46.000+00:00",
+            "createTime": "2022-04-01T11:03:46.000+00:00",
+            "updateTime": null,
+            "operateIp": "127.0.0.1",
+            "status": 1,
+            "aclModuleList": [],
+            "aclList": [
+              {
+                "id": "5ff0e01cc0024f218fbea5c9b726e936",
+                "name": "权限点2",
+                "code": "20220401165400_23",
+                "aclModuleKeyid": "31feda46da3f4fff862b2d3a5f234174",
+                "url": "/test/test222",
+                "seq": 0,
+                "remark": "111",
+                "operator": "测试4",
+                "operateTime": "2022-04-01T16:54:01.000+00:00",
+                "createTime": "2022-04-01T16:54:01.000+00:00",
+                "updateTime": null,
+                "operateIp": "127.0.0.1",
+                "status": 1,
+                "type": 3,
+                "checked": true,
+                "hasAcl": true
+              },
+              {
+                "id": "a9b8091f82404382a70b1bf7791e6a18",
+                "name": "权限点3",
+                "code": "20220401165407_83",
+                "aclModuleKeyid": "31feda46da3f4fff862b2d3a5f234174",
+                "url": "/test/test333",
+                "seq": 0,
+                "remark": "333",
+                "operator": "测试4",
+                "operateTime": "2022-04-01T16:54:50.000+00:00",
+                "createTime": "2022-04-01T16:54:08.000+00:00",
+                "updateTime": null,
+                "operateIp": "127.0.0.1",
+                "status": 1,
+                "type": 3,
+                "checked": true,
+                "hasAcl": true
+              },
+              {
+                "id": "ae60d8db8a4c4556a2de5e7997a5c715",
+                "name": "按部门分页获取列表",
+                "code": "20220401165348_1",
+                "aclModuleKeyid": "31feda46da3f4fff862b2d3a5f234174",
+                "url": "/sysUser/get_page_by_deptkeyid.kevin",
+                "seq": 0,
+                "remark": "111",
+                "operator": "测试4",
+                "operateTime": "2022-04-01T16:53:48.000+00:00",
+                "createTime": "2022-04-01T16:53:48.000+00:00",
+                "updateTime": null,
+                "operateIp": "127.0.0.1",
+                "status": 1,
+                "type": 3,
+                "checked": true,
+                "hasAcl": true
+              }
+            ]
+          },
+          {
+            "id": "5e2b8eeb72c845e9b1ffc03602342b9c",
+            "name": "权限模块12",
+            "parentId": "91405700674b4bbdaa6283e7b9d3f77e",
+            "level": "0.91405700674b4bbdaa6283e7b9d3f77e",
+            "seq": 0,
+            "remark": "测试用，权限模块12",
+            "operator": "测试3",
+            "operateTime": "2022-04-01T11:03:57.000+00:00",
+            "createTime": "2022-04-01T11:03:57.000+00:00",
+            "updateTime": null,
+            "operateIp": "127.0.0.1",
+            "status": 1,
+            "aclModuleList": [],
+            "aclList": []
+          }
+        ],
+        "aclList": []
+      },
+      {
+        "id": "d373deb3d3cf4cdf9b44cf3af0501cfc",
+        "name": "权限模块2",
+        "parentId": "0",
+        "level": "0",
+        "seq": 0,
+        "remark": "测试用，权限模块2",
+        "operator": "测试3",
+        "operateTime": "2022-04-01T11:04:05.000+00:00",
+        "createTime": "2022-04-01T11:04:05.000+00:00",
+        "updateTime": null,
+        "operateIp": "127.0.0.1",
+        "status": 1,
+        "aclModuleList": [],
+        "aclList": []
+      }
+    ]
+  }
+}

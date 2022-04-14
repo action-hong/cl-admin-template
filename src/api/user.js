@@ -1,16 +1,19 @@
 import request from '@/utils/request'
-
+import md5 from 'md5'
 export function login(data) {
   return request({
-    url: '/vue-element-admin/user/login',
-    method: 'post',
-    data
+    url: 'user/login.corelink',
+    method: 'get',
+    params: {
+      ...data,
+      password: md5(data.password).toUpperCase()
+    }
   })
 }
 
 export function getInfo(token) {
   return request({
-    url: '/vue-element-admin/user/info',
+    url: '/sysUser/get_userinfo.corelink',
     method: 'get',
     params: { token }
   })
@@ -18,7 +21,7 @@ export function getInfo(token) {
 
 export function logout() {
   return request({
-    url: '/vue-element-admin/user/logout',
-    method: 'post'
+    url: '/user/logout.corelink',
+    method: 'get'
   })
 }
