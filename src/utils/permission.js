@@ -36,3 +36,39 @@ export function flapPermissions(list, res = []) {
   }
   return res
 }
+
+/**
+ *
+ * @param {ACModules[]} list
+ */
+export function mergeModuleAndPermission(list) {
+  for (let i = 0; i < list.length; i++) {
+    const module = list[i]
+    module.children = []
+    module.myType = 'group'
+    module.isLeaf = false
+
+    mergeModuleAndPermission(module.aclModuleList)
+    // for (let j = 0; j < module.aclModuleList.length; j++) {
+    // const subModule = module.aclModuleList[j]
+    // module.children.push(subModule)
+    // }
+  }
+}
+
+/**
+ *
+ * @param {ACModules} module
+ * @param {ACPoint[]} list
+ */
+export function mergePermissionToModule(module, list) {
+  list.forEach(item => {
+    item.myType = 'point'
+    item.isLeaf = true
+    module.children.push(item)
+  })
+  return [
+    ...module.aclModuleList,
+    ...list
+  ]
+}

@@ -1,19 +1,24 @@
 <template>
   <div class="dashboard-container">
-    <admin-dashboard />
+    你好, {{ name }}
   </div>
 </template>
 
 <script>
-import adminDashboard from './admin'
-
+import { mapGetters } from 'vuex'
 export default {
   name: 'Dashboard',
-  components: { adminDashboard },
-  data() {
-    return {
-      currentRole: 'adminDashboard'
-    }
+  computed: {
+    ...mapGetters([
+      'name'
+    ])
   }
 }
 </script>
+
+<style scoped>
+.dashboard-container {
+  padding: 8px;
+}
+
+</style>
