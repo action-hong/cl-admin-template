@@ -7,6 +7,16 @@
         type="primary"
         @click="fetchList"
       >刷新</el-button>
+      <el-button
+        v-loading="loading"
+        type="primary"
+        @click="handleCreateModule"
+      >新增权限模块</el-button>
+      <el-button
+        v-loading="loading"
+        type="primary"
+        @click="handleCreateACL"
+      >新增权限</el-button>
     </el-header>
     <el-container>
       <el-aside
@@ -19,7 +29,9 @@
           row-key="id"
           border
           default-expand-all
+          highlight-current-row
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
+          @current-change="handleModuleChange"
         >
           <el-table-column
             prop="name"
@@ -35,7 +47,45 @@
           </el-table-column>
         </el-table>
       </el-aside>
-      <el-main>Main</el-main>
+      <el-main>
+        <p>
+          {{ currentModule.name }} 的权限
+        </p>
+        <el-divider />
+        <el-table
+          v-loading="loadingACL"
+          :data="aclList"
+          row-key="id"
+          border
+        >
+          <el-table-column
+            prop="name"
+            label="权限名称"
+          />
+          <el-table-column
+            prop="url"
+            label="权限路径"
+          />
+          <el-table-column label="操作" width="80">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                @click="handleEditACL(scope.row)"
+              >编辑</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          style="margin-top: 20px"
+          :current-page="currentPage"
+          :page-sizes="[10, 15, 20]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="totalSize"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </el-main>
     </el-container>
     <el-dialog
       v-loading="submiting"
@@ -79,11 +129,70 @@
         <el-button type="primary" @click="createOrEditModule">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog
+      v-loading="submiting"
+      title="新增/编辑权限点"
+      :visible.sync="dialogPointFormVisible"
+      :close-on-click-modal="false"
+      @closed="resetForm('pointForm')"
+    >
+      <el-form
+        ref="pointForm"
+        :model="pointForm"
+        :rules="pointRules"
+      >
+        <el-form-item label="id" prop="id" hidden>
+          <el-input v-model="pointForm.id" />
+        </el-form-item>
+        <el-form-item label="aclModuleKeyid" prop="aclModuleKeyid" hidden>
+          <el-input v-model="pointForm.aclModuleKeyid" />
+        </el-form-item>
+        <el-form-item
+          prop="classify"
+          label="上级模块"
+        >
+          <el-cascader
+            v-model="pointForm.classify"
+            :props="{ checkStrictly: true }"
+            :options="moduleOptions"
+            placeholder="--"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="名称" prop="name" required>
+          <el-input v-model="pointForm.name" />
+        </el-form-item>
+        <el-form-item label="权限路径" prop="url" required>
+          <el-input v-model="pointForm.url" />
+        </el-form-item>
+        <el-form-item label="权限类型" prop="type">
+          <el-radio-group v-model="pointForm.type">
+            <el-radio
+              v-for="item in typeOptions"
+              :key="item[0]"
+              :label="item[0]"
+            >
+              {{ item[1] }}
+            </el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="顺序" prop="seq">
+          <el-input-number v-model="pointForm.seq" :min="0" />
+        </el-form-item>
+        <el-form-item label="权限说明" prop="remark">
+          <el-input v-model="pointForm.remark" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogPointFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="createOrEditPoint">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-container>
 </template>
 
 <script>
-import { getSysAclModuletree, updateSysAclModule, saveSysAclModule } from '@/api'
+import { getSysAclModuletree, updateSysAclModule, saveSysAclModule, getPageByAclmodulekeyid, updateACL, saveACL } from '@/api'
 import { resolveACLModule } from '@/utils'
 export default {
   components: {},
@@ -104,21 +213,37 @@ export default {
         // 1 菜单, 2 按钮, 3.其他
         type: 1,
         status: 1,
-        seq: 0
+        seq: 0,
+        classify: []
       },
       pointRules: {
         name: [
           {
             required: true,
-            message: '请输入权限名称',
-            trigger: 'blur'
+            message: '请输入权限名称'
           }
         ],
         url: [
           {
             required: true,
-            message: '请输入权限路径',
-            trigger: 'blur'
+            message: '请输入权限路径'
+          },
+          {
+            min: 6,
+            max: 100,
+            message: '长度在 6 到 100 个字符'
+          }
+        ],
+        classify: [
+          {
+            required: true,
+            validator: (rule, value, callback) => {
+              if (value && value.length > 0) {
+                callback()
+              } else {
+                callback(new Error('请选择上级模块'))
+              }
+            }
           }
         ]
       },
@@ -141,16 +266,24 @@ export default {
         name: [
           {
             required: true,
-            message: '请输入模块名称',
-            trigger: 'blur'
+            message: '请输入模块名称'
           },
           {
             min: 2,
             max: 20,
-            message: '长度在 2 到 20 个字符',
-            trigger: 'blur'
+            message: '长度在 2 到 20 个字符'
           }
         ]
+      },
+      pageSize: 10,
+      totalSize: 0,
+      currentPage: 1,
+      // loading 权限
+      loadingACL: false,
+      aclList: [],
+      // 当前选择的模块
+      currentModule: {
+        name: ''
       }
     }
   },
@@ -168,6 +301,18 @@ export default {
         })
       }
       return resolveModule(this.moduleList)
+    },
+    moduleOptions() {
+      function resolveModule(list) {
+        return list.map(item => {
+          return {
+            value: item.id,
+            label: item.name,
+            children: item.children.length > 0 ? resolveModule(item.children) : []
+          }
+        })
+      }
+      return resolveModule(this.moduleList)
     }
   },
   mounted() {
@@ -179,6 +324,8 @@ export default {
       getSysAclModuletree().then(response => {
         // 有带hasChildren的属性的话, 必须是懒加载, 否则无法加载其他层级
         this.moduleList = resolveACLModule(response.data)
+
+        this.currentModule = this.moduleList[0]
       }).finally(_ => {
         this.loading = false
       })
@@ -186,7 +333,12 @@ export default {
     handleModuleEdit(index, row) {
       this.dialogModuleFormVisible = true
       this.isEdit = true
-      this.moduleForm = Object.assign({}, row)
+      this.$nextTick(() => {
+        this.moduleForm = {
+          ...row,
+          classify: [...row.classify]
+        }
+      })
     },
     createOrEditModule() {
       this.$refs['moduleForm'].validate((valid) => {
@@ -201,9 +353,9 @@ export default {
             parentId
           }).then(response => {
             this.fetchList()
+            this.dialogModuleFormVisible = false
           }).finally(_ => {
             this.submiting = false
-            this.dialogModuleFormVisible = false
           })
         } else {
           console.log('===> 模块表单验证失败')
@@ -213,32 +365,104 @@ export default {
     resetForm(formName) {
       console.log('==> resetForm', formName)
       this.$refs[formName].resetFields()
-      // 重新没啥用, 奇怪
-      this.pointForm = {
-        id: '',
-        aclModuleKeyid: '',
-        name: '',
-        url: '',
-        remark: '',
-        type: 1,
-        status: 1,
-        seq: 0
+    },
+    fetchModuleACL() {
+      if (!this.currentModule) return
+      this.loadingACL = true
+      getPageByAclmodulekeyid({
+        pageNo: this.currentPage,
+        pageSize: this.pageSize,
+        aclModuleKeyid: this.currentModule.id
+      }).then(res => {
+        this.aclList = res.data.data || []
+        this.totalSize = res.data.size
+        console.log(res)
+      }).finally(_ => {
+        this.loadingACL = false
+      })
+    },
+    handleModuleChange(node) {
+      this.currentModule = node
+      this.currentPage = 1
+      this.fetchModuleACL()
+    },
+    handleSizeChange(size) {
+      this.pageSize = size
+      this.fetchModuleACL()
+    },
+    handleCurrentChange(currentPage) {
+      this.currentPage = currentPage
+      this.fetchModuleACL()
+    },
+    handleCreateACL() {
+      this.isEdit = false
+      this.dialogPointFormVisible = true
+      this.$nextTick(_ => {
+        if (this.currentModule) {
+          this.pointForm.classify = [...this.currentModule.classify]
+        }
+      })
+    },
+    handleCreateModule() {
+      this.isEdit = false
+      this.dialogModuleFormVisible = true
+      this.$nextTick(_ => {
+        if (this.currentModule) {
+          this.moduleForm.classify = [...this.currentModule.classify]
+        }
+      })
+    },
+    findParent(list, id) {
+      for (let i = 0; i < list.length; i++) {
+        if (list[i].id === id) {
+          return list[i]
+        } else {
+          if (list[i].children.length > 0) {
+            const find = this.findParent(list[i].children, id)
+            if (find) return find
+          }
+        }
       }
-
-      this.moduleForm = {
-        id: '',
-        parentId: '',
-        name: '',
-        remark: '',
-        seq: 0,
-        status: 1,
-        classify: []
-      }
+    },
+    handleEditACL(row) {
+      this.isEdit = true
+      // 找到对应的上级
+      const item = this.findParent(this.moduleList, row.aclModuleKeyid)
+      this.dialogPointFormVisible = true
+      this.$nextTick(() => {
+        this.pointForm = {
+          ...row,
+          classify: [...item.classify, row.aclModuleKeyid]
+        }
+      })
+    },
+    createOrEditPoint() {
+      this.$refs['pointForm'].validate((valid) => {
+        if (valid) {
+          console.log('===> 权限点表单验证通过', this.pointForm)
+          this.submiting = true
+          const api = this.isEdit ? updateACL : saveACL
+          const aclModuleKeyid = this.pointForm.classify[this.pointForm.classify.length - 1]
+          api({
+            ...this.pointForm,
+            aclModuleKeyid
+          }).then(response => {
+            this.fetchModuleACL()
+            this.dialogPointFormVisible = false
+          }).finally(_ => {
+            this.submiting = false
+          })
+        } else {
+          console.log('===> 权限点表单验证失败')
+        }
+      })
     }
   }
 }
 </script>
 <style lang='scss' scoped>
 //@import url(); 引入公共css类
-
+.el-main {
+  padding: 8px 24px;
+}
 </style>
