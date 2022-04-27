@@ -68,3 +68,66 @@ export const saveACL = (data = {}) => {
   })
 }
 
+export const saveRole = (data = {}) => {
+  return request.request({
+    method: 'POST',
+    url: '/sysRole/save.corelink',
+    data
+  })
+}
+
+export const updateRole = (data = {}) => {
+  return request.request({
+    method: 'POST',
+    url: '/sysRole/update.corelink',
+    data
+  })
+}
+
+/**
+ *
+ * @param {{ roleId: string }} params
+ * @returns
+ */
+export const getRoleTree = (params = {}) => {
+  return request.request({
+    method: 'GET',
+    url: '/sysRole/tree.corelink',
+    params
+  })
+}
+
+/**
+ *
+ * @param {{ userIds: string[], roleId: string  }} params
+ * @returns
+ */
+export const changeRoleUsers = (params = {}) => {
+  return request.request({
+    method: 'GET',
+    url: '/sysRole/changeUsers.corelink',
+    params
+  })
+}
+
+/**
+ *
+ * @param {{ aclIds: string[], roleId: string  }} params
+ * @returns
+ */
+export const changeRoleAcls = (params = {}) => {
+  return request.request({
+    method: 'GET',
+    url: '/sysRole/changeAcls.corelink',
+    params
+  })
+}
+
+export const getRolelist = (params = {}) => {
+  return request.request({
+    method: 'GET',
+    url: '/sysRole/list.corelink',
+    params
+  })
+}
+

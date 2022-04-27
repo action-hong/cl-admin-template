@@ -87,12 +87,19 @@ export const constantRoutes = [
     path: '/permission',
     component: Layout,
     redirect: '/permission/index',
+    meta: { title: '权限', icon: 'lock' },
     children: [
       {
         path: 'index',
         component: () => import('@/views/permission/index'),
         name: 'Permission',
-        meta: { title: '权限管理', icon: 'lock', affix: true }
+        meta: { title: '权限管理' }
+      },
+      {
+        path: 'role',
+        component: () => import('@/views/permission/role'),
+        name: 'Role',
+        meta: { title: '角色管理' }
       }
     ]
   },

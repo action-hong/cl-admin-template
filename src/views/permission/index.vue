@@ -140,10 +140,10 @@
           <el-input v-model="moduleForm.name" />
         </el-form-item>
         <el-form-item label="顺序" prop="seq">
-          <el-input-number v-model="pointForm.seq" :min="0" />
+          <el-input-number v-model="moduleForm.seq" :min="0" />
         </el-form-item>
         <el-form-item label="权限说明" prop="remark">
-          <el-input v-model="pointForm.remark" />
+          <el-input v-model="moduleForm.remark" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
