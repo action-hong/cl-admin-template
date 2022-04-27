@@ -12,6 +12,7 @@
       权限树
     </h2>
     <el-tree
+      v-loading="loading"
       :data="list"
       lazy
       :load="loadModule"
@@ -52,7 +53,7 @@
             size="mini"
             @click="() => deletePermission(node.data)"
           >
-            删除
+            {{ node.data.status === 1 ? '禁用' : '启用' }}
           </el-button>
         </span>
       </div>
@@ -104,11 +105,44 @@
         <el-button type="primary" @click="createOrEditPoint">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog
+      v-loading="submiting"
+      title="新增/编辑权限模块"
+      :visible.sync="dialogModuleFormVisible"
+      :close-on-click-modal="false"
+      @closed="resetForm('moduleForm')"
+    >
+      <el-form
+        ref="moduleForm"
+        :model="moduleForm"
+        :rules="moduleRules"
+      >
+        <el-form-item label="id" prop="id" hidden>
+          <el-input v-model="moduleForm.id" />
+        </el-form-item>
+        <el-form-item label="parentId" prop="parentId" hidden>
+          <el-input v-model="moduleForm.parentId" />
+        </el-form-item>
+        <el-form-item label="名称" prop="name" required>
+          <el-input v-model="moduleForm.name" />
+        </el-form-item>
+        <el-form-item label="顺序" prop="seq">
+          <el-input-number v-model="pointForm.seq" :min="0" />
+        </el-form-item>
+        <el-form-item label="权限说明" prop="remark">
+          <el-input v-model="pointForm.remark" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogModuleFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="createOrEditModule">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getSysAclModuletree, getPageByAclmodulekeyid, updateACL, saveACL } from '@/api'
+import { getSysAclModuletree, getPageByAclmodulekeyid, updateACL, saveACL, saveSysAclModule, updateSysAclModule, deletesysAclModule } from '@/api'
 import { mergeModuleAndPermission, mergePermissionToModule } from '@/utils'
 
 export default {
@@ -118,6 +152,7 @@ export default {
       list: [],
       loading: false,
       dialogPointFormVisible: false,
+      dialogModuleFormVisible: false,
       isEdit: false,
       submiting: false,
       pointForm: {
@@ -151,7 +186,24 @@ export default {
         [1, '菜单'],
         [2, '按钮'],
         [3, '其他']
-      ]
+      ],
+      moduleForm: {
+        id: '',
+        parentId: '',
+        name: '',
+        remark: '',
+        seq: 0,
+        status: 1
+      },
+      moduleRules: {
+        name: [
+          {
+            required: true,
+            message: '请输入模块名称',
+            trigger: 'blur'
+          }
+        ]
+      }
     }
   },
   mounted() {
@@ -170,7 +222,8 @@ export default {
     },
     addModule(node) {
       this.isEdit = false
-      // TODO:
+      this.moduleForm.parentId = node.id
+      this.dialogModuleFormVisible = true
       console.log('===> 在改节点下添加模块', node)
     },
     addPermission(node) {
@@ -181,6 +234,27 @@ export default {
     },
     deletePermission(node) {
       console.log('===> 删除改节点', node)
+      this.loading = true
+      if (node.myType === 'group') {
+        deletesysAclModule({
+          aclModuleKeyid: node.id
+        }).then(() => {
+          this.$message.success('删除成功')
+          this.fetchList()
+        }).finally(_ => {
+          this.loading = false
+        })
+      } else {
+        updateACL({
+          ...node,
+          status: 0
+        }).then(() => {
+          this.$message.success('删除成功')
+          this.fetchList()
+        }).finally(_ => {
+          this.loading = false
+        })
+      }
     },
     editNode(node) {
       console.log('===> 编辑改节点', node)
@@ -189,8 +263,12 @@ export default {
         this.pointForm = {
           ...node
         }
-        delete this.pointForm.isLeaf
         this.dialogPointFormVisible = true
+      } else {
+        this.moduleForm = {
+          ...node
+        }
+        this.dialogModuleFormVisible = true
       }
     },
     loadModule(node, resolve) {
@@ -223,6 +301,15 @@ export default {
         status: 1,
         seq: 0
       }
+
+      this.moduleForm = {
+        id: '',
+        parentId: '',
+        name: '',
+        remark: '',
+        seq: 0,
+        status: 1
+      }
     },
     createOrEditPoint() {
       this.$refs['pointForm'].validate((valid) => {
@@ -240,6 +327,25 @@ export default {
           })
         } else {
           console.log('===> 权限点表单验证失败')
+        }
+      })
+    },
+    createOrEditModule() {
+      this.$refs['moduleForm'].validate((valid) => {
+        if (valid) {
+          console.log('===> 模块表单验证通过', this.moduleForm)
+          this.submiting = true
+          const api = this.isEdit ? updateSysAclModule : saveSysAclModule
+          api({
+            ...this.moduleForm
+          }).then(response => {
+            this.fetchList()
+          }).finally(_ => {
+            this.submiting = false
+            this.dialogModuleFormVisible = false
+          })
+        } else {
+          console.log('===> 模块表单验证失败')
         }
       })
     }
