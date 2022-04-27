@@ -5,6 +5,7 @@ interface ACModules {
   aclModuleList: ACModules[]
   aclList: ACPoint[]
   children: (ACModules | ACPoint)[]
+  myType: 'group',
 }
 
 interface ACPoint {
@@ -14,4 +15,7 @@ interface ACPoint {
   aclModuleKeyid: string
   url: string
   remark: string
+  myType: 'point'
+  checked: boolean
+
 }

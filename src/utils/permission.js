@@ -84,3 +84,54 @@ export function resolveACLModule(list, classify = []) {
   return list
 }
 
+/**
+ *
+ * @param {ACModules[]} list
+ */
+export function resolveModuleForTree(list) {
+  for (let i = 0; i < list.length; i++) {
+    const module = list[i]
+    module.myType = 'group'
+
+    resolveModuleForTree(module.aclModuleList)
+    module.children = [...module.aclModuleList]
+    for (let j = 0; j < module.aclList.length; j++) {
+      const subModule = module.aclList[j]
+      subModule.myType = 'point'
+      module.children.push(subModule)
+    }
+  }
+  return list
+}
+
+/**
+ *
+ * @param {ACModules[]} list
+ */
+export function getRoleAcl(list, res = []) {
+  list.forEach(item => {
+    getRoleAcl(item.aclModuleList, res)
+    item.aclList.forEach(acl => {
+      if (acl.checked) {
+        res.push(acl.id)
+      }
+    })
+  })
+  return res
+}
+
+/**
+ *
+ * @param {ACModules} item
+ */
+export function getAllAcl(item, res = []) {
+  item.aclList.forEach(acl => {
+    res.push(acl.id)
+  })
+  if (item.aclModuleList.length > 0) {
+    item.aclModuleList.forEach(module => {
+      getAllAcl(module, res)
+    })
+  }
+  return res
+}

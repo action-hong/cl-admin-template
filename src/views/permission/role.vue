@@ -18,7 +18,9 @@
         :data="roles"
         row-key="id"
         style="margin-top: 10px;"
+        highlight-current-row
         border
+        @current-change="handleRoleChange"
       >
         <el-table-column
           prop="name"
@@ -35,6 +37,32 @@
       </el-table>
 
     </el-aside>
+    <el-main>
+      <el-tabs v-model="activeName">
+        <el-tab-pane
+          v-loading="loadingRoleAcl"
+          label="角色与权限"
+          name="first"
+        >
+          <el-tree
+            ref="roleAclTree"
+            :props="{
+              label: 'name',
+              children: 'children'
+            }"
+            :data="roleAclTree"
+            default-expand-all
+            node-key="id"
+            show-checkbox
+          /></el-tab-pane>
+        <el-button
+          style="margin-top: 15px;"
+          type="primary"
+          @click="updateRoleAcl"
+        >更新权限</el-button>
+        <el-tab-pane label="角色与用户" name="second">角色与用户</el-tab-pane>
+      </el-tabs>
+    </el-main>
     <el-dialog
       v-loading="submiting"
       title="新增/编辑角色"
@@ -66,7 +94,8 @@
 </template>
 
 <script>
-import { getRolelist, saveRole, updateRole } from '@/api'
+import { changeRoleAcls, getRolelist, getRoleTree, saveRole, updateRole } from '@/api'
+import { resolveModuleForTree, getRoleAcl, getAllAcl } from '@/utils'
 
 export default {
   components: {},
@@ -96,10 +125,20 @@ export default {
             message: '角色名称长度在 2 到 20 个字符'
           }
         ]
-      }
+      },
+      currentRole: {
+        id: '',
+        name: ''
+      },
+      activeName: 'first',
+      loadingRoleAcl: false,
+      loadingRoleUser: false,
+      roleAclTree: []
     }
   },
-  computed: {},
+  computed: {
+
+  },
   watch: {},
   created() {
 
@@ -113,6 +152,10 @@ export default {
       getRolelist()
         .then(res => {
           this.roles = res.data
+          if (this.roles.length > 0) {
+            this.currentRole = this.roles[0]
+            this.fetchRoleRelative()
+          }
         }).finally(_ => {
           this.loading = false
         })
@@ -151,6 +194,49 @@ export default {
             this.submiting = false
           })
         }
+      })
+    },
+    handleRoleChange(role) {
+      this.currentRole = role
+      this.fetchRoleRelative()
+    },
+    fetchRoleRelative() {
+      this.fetchRoleAcl()
+      this.fetchRoleUser()
+    },
+    fetchRoleAcl() {
+      this.loadingRoleAcl = true
+      getRoleTree({
+        roleId: this.currentRole.id
+      }).then(res => {
+        console.log('role acl', res)
+        this.roleAclTree = resolveModuleForTree(res.data)
+        // checked
+        const aclIds = getRoleAcl(res.data)
+        console.log('aclIds', aclIds)
+        this.$refs['roleAclTree'].setCheckedKeys(aclIds)
+      }).finally(_ => {
+        this.loadingRoleAcl = false
+      })
+    },
+    fetchRoleUser() {
+
+    },
+    updateRoleAcl() {
+      const nodes = this.$refs['roleAclTree'].getCheckedNodes()
+      console.log('==> updateRoleAcl', nodes)
+      const ids = nodes.map(item => item.myType === 'group' ? getAllAcl(item) : item.id).flat().join(',')
+      this.loadingRoleAcl = true
+      changeRoleAcls({
+        aclIds: ids,
+        roleId: this.currentRole.id
+      }).then(_ => {
+        this.$message({
+          type: 'success',
+          message: '权限更新成功'
+        })
+      }).finally(_ => {
+        this.loadingRoleAcl = false
       })
     }
   }
