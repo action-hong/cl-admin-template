@@ -1,5 +1,4 @@
 interface ACModules {
-  myType: 'group'
   level: number
   id: string
   parentId: string
@@ -9,7 +8,6 @@ interface ACModules {
 }
 
 interface ACPoint {
-  myType: 'point'
   id: string
   name: string
   code: string

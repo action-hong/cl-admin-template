@@ -10,7 +10,7 @@ export default function checkPermission(value) {
     const roles = store.getters && store.getters.roles
     const permissionRoles = value
 
-    const hasPermission = roles.some(role => {
+    const hasPermission = roles.some((role) => {
       return permissionRoles.includes(role)
     })
     return hasPermission
@@ -27,8 +27,8 @@ export default function checkPermission(value) {
  */
 export function flapPermissions(list, res = []) {
   if (list && list.length > 0) {
-    list.forEach(item => {
-      item.aclList.forEach(acl => {
+    list.forEach((item) => {
+      item.aclList.forEach((acl) => {
         res.push(acl.url)
       })
       flapPermissions(item.aclModuleList, res)
@@ -62,13 +62,25 @@ export function mergeModuleAndPermission(list) {
  * @param {ACPoint[]} list
  */
 export function mergePermissionToModule(module, list) {
-  list.forEach(item => {
+  list.forEach((item) => {
     item.myType = 'point'
     item.isLeaf = true
     module.children.push(item)
   })
-  return [
-    ...module.aclModuleList,
-    ...list
-  ]
+  return [...module.aclModuleList, ...list]
 }
+
+/**
+ *
+ * @param {ACModules[]} list
+ */
+export function resolveACLModule(list, classify = []) {
+  list.forEach((item) => {
+    item.classify = classify
+    item.children = item.aclModuleList
+    resolveACLModule(item.aclModuleList, [...classify, item.id])
+    delete item.aclModuleList
+  })
+  return list
+}
+

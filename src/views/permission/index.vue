@@ -299,7 +299,7 @@ export default {
         remark: '',
         type: 1,
         status: 1,
-        seq: 0
+        seq: 0,
       }
 
       this.moduleForm = {
