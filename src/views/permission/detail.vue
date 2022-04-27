@@ -56,22 +56,44 @@
           v-loading="loadingACL"
           :data="aclList"
           row-key="id"
+          empty-text="该模块暂时没有权限"
           border
         >
           <el-table-column
             prop="name"
             label="权限名称"
+            width="120"
           />
           <el-table-column
             prop="url"
             label="权限路径"
           />
-          <el-table-column label="操作" width="80">
+          <el-table-column
+            prop="type"
+            label="类型"
+            width="80"
+          >
+            <template slot-scope="scope">
+              <el-tag
+                :type="['', 'success', 'warning'][scope.row.type] || ''"
+              >
+                {{ scope.row.type | permissionType }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="150">
             <template slot-scope="scope">
               <el-button
                 size="mini"
                 @click="handleEditACL(scope.row)"
               >编辑</el-button>
+              <el-divider
+                direction="vertical"
+              />
+              <el-button
+                size="mini"
+                @click="handleChangeACLStatus(scope.row)"
+              >{{ scope.row.status === 1 ? '禁用' : '启用' }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -196,6 +218,18 @@ import { getSysAclModuletree, updateSysAclModule, saveSysAclModule, getPageByAcl
 import { resolveACLModule } from '@/utils'
 export default {
   components: {},
+  filters: {
+    permissionType(type) {
+      switch (type) {
+        case 1:
+          return '菜单'
+        case 2:
+          return '按钮'
+        default:
+          return '其他'
+      }
+    }
+  },
   data() {
     return {
       moduleList: [],
@@ -399,7 +433,7 @@ export default {
       this.dialogPointFormVisible = true
       this.$nextTick(_ => {
         if (this.currentModule) {
-          this.pointForm.classify = [...this.currentModule.classify]
+          this.pointForm.classify = [...this.currentModule.classify, this.currentModule.id]
         }
       })
     },
@@ -434,6 +468,15 @@ export default {
           ...row,
           classify: [...item.classify, row.aclModuleKeyid]
         }
+      })
+    },
+    handleChangeACLStatus(row) {
+      const status = row.status === 1 ? 0 : 1
+      updateACL({
+        ...row,
+        status
+      }).then(_ => {
+        row.status = status
       })
     },
     createOrEditPoint() {
