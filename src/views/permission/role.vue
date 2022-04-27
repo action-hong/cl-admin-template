@@ -38,7 +38,9 @@
 
     </el-aside>
     <el-main>
-      <el-tabs v-model="activeName">
+      <el-tabs
+        v-model="activeName"
+      >
         <el-tab-pane
           v-loading="loadingRoleAcl"
           label="角色与权限"
@@ -54,7 +56,13 @@
             default-expand-all
             node-key="id"
             show-checkbox
-          /></el-tab-pane>
+          >
+            <span slot-scope="{ data }" class="custom-tree-node">
+              <i v-if="data.myType === 'group'" class="el-icon-folder" />
+              <span style="margin-left: 8px;">{{ data.name }}</span>
+            </span>
+          </el-tree>
+        </el-tab-pane>
         <el-button
           style="margin-top: 15px;"
           type="primary"
