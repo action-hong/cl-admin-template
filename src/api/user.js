@@ -84,3 +84,37 @@ export const getPageByDeptkeyid = (params = {}) => {
   })
 }
 
+/**
+ *
+ * @param {{  id: string, username: string,telephone: string,mail: string,deptId: string,status: 2,remark: string}} data
+ * @returns
+ */
+export const saveUser = (data = {}) => {
+  return request.request({
+    method: 'POST',
+    url: '/sysUser/save.corelink',
+    data
+  })
+}
+
+export const updateUser = (data = {}) => {
+  return request.request({
+    method: 'POST',
+    url: '/sysUser/update.corelink',
+    data
+  })
+}
+
+/**
+ *
+ * @param {{ id: string }} params
+ * @returns
+ */
+export const resetUserPassword = (params = {}) => {
+  return request.request({
+    method: 'GET',
+    url: '/sysUser/resetPassword.corelink',
+    params
+  })
+}
+

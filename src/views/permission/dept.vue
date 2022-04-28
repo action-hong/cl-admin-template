@@ -12,6 +12,12 @@
         >
           新增部门
         </el-button>
+        <el-button
+          type="primary"
+          @click="handleCreateUser"
+        >
+          新增系统用户
+        </el-button>
       </div>
       <el-table
         v-loading="loading"
@@ -80,6 +86,17 @@
               size="mini"
               @click="handleEditUser(scope.row)"
             >编辑</el-button>
+            <el-divider direction="vertical" />
+            <el-popconfirm
+              title="是否重置密码?"
+              @onConfirm="handleResetPassword(scope.row)"
+            >
+              <el-button
+                slot="reference"
+                size="mini"
+                type="danger"
+              >重置</el-button>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -136,11 +153,62 @@
         <el-button type="primary" @click="createOrEditDept">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog
+      v-loading="submiting"
+      title="新增/编辑用户"
+      :visible.sync="dialogUserFromVisiable"
+      :close-on-click-modal="false"
+      @closed="resetForm('userForm')"
+    >
+      <el-form
+        ref="userForm"
+        :model="userForm"
+        :rules="userRuels"
+      >
+        <el-form-item label="id" prop="id" hidden>
+          <el-input v-model="userForm.id" />
+        </el-form-item>
+        <el-form-item label="deptId" prop="deptId" hidden>
+          <el-input v-model="userForm.deptId" />
+        </el-form-item>
+        <el-form-item
+          prop="classify"
+          label="上级模块"
+        >
+          <el-cascader
+            v-model="userForm.classify"
+            :props="{ checkStrictly: true }"
+            :options="deptOptions"
+            placeholder="--"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="名称" prop="username" required>
+          <el-input v-model="userForm.username" />
+        </el-form-item>
+        <el-form-item label="邮箱" prop="mail" required>
+          <el-input v-model="userForm.mail" />
+        </el-form-item>
+        <el-form-item label="电话" prop="telephone" required>
+          <el-input v-model="userForm.telephone" />
+        </el-form-item>
+        <el-form-item label="顺序" prop="seq">
+          <el-input-number v-model="userForm.seq" :min="0" />
+        </el-form-item>
+        <el-form-item label="说明" prop="remark">
+          <el-input v-model="userForm.remark" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogUserFromVisiable = false">取 消</el-button>
+        <el-button type="primary" @click="createOrEditUser">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-container>
 </template>
 
 <script>
-import { deleteDept, getDeptTree, getPageByDeptkeyid, saveDept, updateDept } from '@/api'
+import { deleteDept, getDeptTree, getPageByDeptkeyid, resetUserPassword, saveDept, saveUser, updateDept, updateUser } from '@/api'
 import { resolveDept } from '@/utils'
 export default {
   components: {},
@@ -181,7 +249,25 @@ export default {
       loadingUser: false,
       pageSize: 10,
       totalSize: 0,
-      currentPage: 1
+      currentPage: 1,
+      dialogUserFromVisiable: false,
+      userForm: {
+        id: '',
+        username: '',
+        telephone: '',
+        mail: '',
+        deptId: '',
+        status: 2,
+        remark: ''
+      },
+      userRuels: {
+        username: [
+          {
+            required: true,
+            message: '请输入名称'
+          }
+        ]
+      }
     }
   },
   computed: {
@@ -198,6 +284,18 @@ export default {
         })
       }
       return resolveModule(this.depts || [])
+    },
+    deptOptions() {
+      function resolveModule(list) {
+        return list.map(item => {
+          return {
+            value: item.id,
+            label: item.name,
+            children: item.deptList.length > 0 ? resolveModule(item.deptList) : []
+          }
+        })
+      }
+      return resolveModule(this.depts)
     }
   },
   mounted() {
@@ -291,8 +389,70 @@ export default {
         this.loadingUser = false
       })
     },
+    handleCreateUser() {
+      this.isEdit = false
+      this.dialogUserFromVisiable = true
+      this.$nextTick(_ => {
+        if (this.currentDept) {
+          this.userForm.classify = [...this.currentDept.classify, this.currentDept.id]
+        }
+      })
+    },
     handleEditUser(row) {
-
+      this.isEdit = true
+      // 找到对应的上级
+      const item = this.findParent(this.depts, row.deptKeyid)
+      this.dialogUserFromVisiable = true
+      this.$nextTick(() => {
+        this.userForm = {
+          ...row,
+          classify: [...item.classify, row.deptKeyid]
+        }
+      })
+    },
+    findParent(list, id) {
+      for (let i = 0; i < list.length; i++) {
+        if (list[i].id === id) {
+          return list[i]
+        } else {
+          if (list[i].deptList.length > 0) {
+            const find = this.findParent(list[i].deptList, id)
+            if (find) return find
+          }
+        }
+      }
+    },
+    createOrEditUser() {
+      this.$refs.userForm.validate(valid => {
+        if (valid) {
+          this.submiting = true
+          const params = {
+            ...this.userForm
+          }
+          const deptId = this.userForm.classify[this.userForm.classify.length - 1]
+          const api = this.isEdit ? updateUser : saveUser
+          api({
+            ...params,
+            deptId
+          }).then(response => {
+            this.fetchDeptUser()
+            this.dialogUserFromVisiable = false
+          }).finally(_ => {
+            this.submiting = false
+          })
+        }
+      })
+    },
+    handleResetPassword(row) {
+      resetUserPassword({
+        id: row.id
+      }).then((res) => {
+        this.$notify({
+          message: res.msg,
+          duration: 0,
+          type: 'success'
+        })
+      })
     }
   }
 }
