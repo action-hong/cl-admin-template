@@ -69,6 +69,18 @@ export const deleteDept = (params = {}) => {
     url: '/sysDept/delete.corelink',
     params
   })
-  }
-  
+}
+
+/**
+ *
+ * @param {{ deptKeyid: string, pageNo?: number, pageSize?: number }} params
+ * @returns
+ */
+export const getPageByDeptkeyid = (params = {}) => {
+  return request.request({
+    method: 'GET',
+    url: '/sysUser/get_page_by_deptkeyid.corelink',
+    params
+  })
+}
 

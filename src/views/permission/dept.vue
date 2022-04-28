@@ -52,7 +52,48 @@
       </el-table>
 
     </el-aside>
-    <el-main />
+    <el-main>
+      <p>当前部门: {{ currentDept.name }}</p>
+      <el-divider />
+      <el-table
+        v-loading="loadingUser"
+        :data="deptUser"
+        row-key="id"
+        empty-text="该部门暂时没有员工"
+        border
+      >
+        <el-table-column
+          prop="username"
+          label="姓名"
+        />
+        <el-table-column
+          prop="mail"
+          label="email"
+        />
+        <el-table-column
+          prop="telephone"
+          label="电话"
+        />
+        <el-table-column label="操作" width="150">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              @click="handleEditUser(scope.row)"
+            >编辑</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        style="margin-top: 20px"
+        :current-page="currentPage"
+        :page-sizes="[10, 15, 20]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="totalSize"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </el-main>
     <el-dialog
       v-loading="submiting"
       title="新增/编辑部门"
@@ -99,7 +140,7 @@
 </template>
 
 <script>
-import { deleteDept, getDeptTree, saveDept, updateDept } from '@/api'
+import { deleteDept, getDeptTree, getPageByDeptkeyid, saveDept, updateDept } from '@/api'
 import { resolveDept } from '@/utils'
 export default {
   components: {},
@@ -134,7 +175,13 @@ export default {
           }
         ]
       },
-      submiting: false
+      submiting: false,
+      // 用户
+      deptUser: [],
+      loadingUser: false,
+      pageSize: 10,
+      totalSize: 0,
+      currentPage: 1
     }
   },
   computed: {
@@ -162,6 +209,7 @@ export default {
       getDeptTree()
         .then(res => {
           this.depts = resolveDept(res.data)
+          this.handleDeptChange(this.depts[0])
         }).finally(_ => {
           this.loading = false
         })
@@ -190,7 +238,11 @@ export default {
         this.loading = false
       })
     },
-    handleDeptChange() {},
+    handleDeptChange(row) {
+      this.currentDept = row
+      this.currentPage = 1
+      this.fetchDeptUser()
+    },
     resetForm(formName) {
       this.$refs[formName].resetFields()
     },
@@ -215,6 +267,32 @@ export default {
           })
         }
       })
+    },
+    handleSizeChange(size) {
+      this.pageSize = size
+      this.fetchDeptUser()
+    },
+    handleCurrentChange(currentPage) {
+      this.currentPage = currentPage
+      this.fetchDeptUser()
+    },
+    fetchDeptUser() {
+      if (!this.currentDept) return
+      this.loadingUser = true
+      getPageByDeptkeyid({
+        pageNo: this.currentPage,
+        pageSize: this.pageSize,
+        deptKeyid: this.currentDept.id
+      }).then(res => {
+        this.deptUser = res.data.data || []
+        this.totalSize = res.data.size
+        console.log(res)
+      }).finally(_ => {
+        this.loadingUser = false
+      })
+    },
+    handleEditUser(row) {
+
     }
   }
 }
