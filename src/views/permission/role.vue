@@ -38,6 +38,9 @@
 
     </el-aside>
     <el-main>
+      <p>
+        当前选择的角色: {{ currentRole.name }}
+      </p>
       <el-tabs
         v-model="activeName"
       >
@@ -62,13 +65,38 @@
               <span style="margin-left: 8px;">{{ data.name }}</span>
             </span>
           </el-tree>
+          <el-button
+            style="margin-top: 15px;"
+            type="primary"
+            @click="updateRoleAcl"
+          >更新权限</el-button>
         </el-tab-pane>
-        <el-button
-          style="margin-top: 15px;"
-          type="primary"
-          @click="updateRoleAcl"
-        >更新权限</el-button>
-        <el-tab-pane label="角色与用户" name="second">角色与用户</el-tab-pane>
+        <el-tab-pane
+          v-loading="loadingRoleUser"
+          label="角色与用户"
+          name="second"
+        >
+          <el-transfer
+            v-model="currentRoleUsers"
+            :titles="['不属于该角色的用户', '属于该角色的用户']"
+            filterable
+            :data="roleUserList"
+            :props="{
+              key: 'id',
+              label: 'username'
+            }"
+          />
+          <el-button
+            style="margin-top: 15px;"
+            type="primary"
+            @click="updateRoleUsers"
+          >更新角色对应的用户</el-button>
+          <el-button
+            style="margin-top: 15px;"
+            type="primary"
+            @click="resetRoleUsers"
+          >重置</el-button>
+        </el-tab-pane>
       </el-tabs>
     </el-main>
     <el-dialog
@@ -102,7 +130,7 @@
 </template>
 
 <script>
-import { changeRoleAcls, getRolelist, getRoleTree, saveRole, updateRole } from '@/api'
+import { changeRoleAcls, changeRoleUsers, getRolelist, getRoleTree, getRoleUsers, saveRole, updateRole } from '@/api'
 import { resolveModuleForTree, getRoleAcl, getAllAcl } from '@/utils'
 
 export default {
@@ -141,7 +169,10 @@ export default {
       activeName: 'first',
       loadingRoleAcl: false,
       loadingRoleUser: false,
-      roleAclTree: []
+      roleAclTree: [],
+      roleUserList: [],
+      tempRolueUsers: [],
+      currentRoleUsers: []
     }
   },
   computed: {
@@ -180,7 +211,6 @@ export default {
       })
     },
     resetForm(formName) {
-      console.log('==> resetForm', formName)
       this.$refs[formName].resetFields()
     },
     createOrEditRole() {
@@ -217,22 +247,32 @@ export default {
       getRoleTree({
         roleId: this.currentRole.id
       }).then(res => {
-        console.log('role acl', res)
         this.roleAclTree = resolveModuleForTree(res.data)
         // checked
         const aclIds = getRoleAcl(res.data)
-        console.log('aclIds', aclIds)
         this.$refs['roleAclTree'].setCheckedKeys(aclIds)
       }).finally(_ => {
         this.loadingRoleAcl = false
       })
     },
     fetchRoleUser() {
-
+      this.loadingRoleUser = true
+      getRoleUsers({
+        roleId: this.currentRole.id
+      }).then(res => {
+        this.roleUserList = [
+          ...res.data.unselected,
+          ...res.data.selected
+        ]
+        this.currentRoleUsers = res.data.selected.map(item => item.id)
+        this.tempRolueUsers = [...this.currentRoleUsers]
+      }).finally(_ => {
+        this.loadingRoleUser = false
+      })
     },
     updateRoleAcl() {
+      if (this.loadingRoleAcl) return
       const nodes = this.$refs['roleAclTree'].getCheckedNodes()
-      console.log('==> updateRoleAcl', nodes)
       const ids = nodes.map(item => item.myType === 'group' ? getAllAcl(item) : item.id).flat().join(',')
       this.loadingRoleAcl = true
       changeRoleAcls({
@@ -246,6 +286,28 @@ export default {
       }).finally(_ => {
         this.loadingRoleAcl = false
       })
+    },
+    updateRoleUsers() {
+      console.log('updateRoleUsers')
+      if (this.loadingRoleUser) return
+      const ids = this.currentRoleUsers.join(',')
+      this.loadingRoleUser = true
+      changeRoleUsers({
+        roleId: this.currentRole.id,
+        userIds: ids
+      }).then(_ => {
+        this.$message({
+          type: 'success',
+          message: '角色用户更新成功'
+        })
+        this.tempRolueUsers = [...this.currentRoleUsers]
+      }).finally(_ => {
+        this.loadingRoleUser = false
+      })
+    },
+    resetRoleUsers() {
+      if (this.loadingRoleUser) return
+      this.currentRoleUsers = [...this.tempRolueUsers]
     }
   }
 

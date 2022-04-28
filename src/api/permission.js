@@ -131,3 +131,16 @@ export const getRolelist = (params = {}) => {
   })
 }
 
+/**
+ *
+ * @param {{ roleId: string }} params
+ * @returns
+ */
+export const getRoleUsers = (params = {}) => {
+  return request.request({
+    method: 'GET',
+    url: '/sysRole/users.corelink',
+    params
+  })
+}
+
