@@ -135,3 +135,11 @@ export function getAllAcl(item, res = []) {
   }
   return res
 }
+
+export function resolveDept(list, classify = []) {
+  list.forEach((item) => {
+    item.classify = classify
+    resolveDept(item.deptList, [...classify, item.id])
+  })
+  return list
+}

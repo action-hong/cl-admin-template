@@ -25,3 +25,50 @@ export function logout() {
     method: 'get'
   })
 }
+
+export const getDeptTree = (params = {}) => {
+  return request.request({
+    method: 'GET',
+    url: '/sysDept/tree.corelink',
+    params
+  })
+}
+
+/**
+ *
+ * @param {{ id: string, name: string, parentId: string, seq: 0, remark: string }} data
+ * @returns
+ */
+export const saveDept = (data = {}) => {
+  return request.request({
+    method: 'POST',
+    url: '/sysDept/save.corelink',
+    data
+  })
+}
+
+/**
+ *
+ * @param {{ id: string, name: string, parentId: string, seq: 0, remark: string }} data
+ * @returns
+ */
+export const updateDept = (data = {}) => {
+  return request.request({
+    method: 'POST',
+    url: '/sysDept/update.corelink',
+    data
+  })
+}
+
+/**
+ * @param {{ deptId: string }} data
+ */
+export const deleteDept = (params = {}) => {
+  return request.request({
+    method: 'GET',
+    url: '/sysDept/delete.corelink',
+    params
+  })
+  }
+  
+
