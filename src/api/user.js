@@ -118,3 +118,11 @@ export const resetUserPassword = (params = {}) => {
   })
 }
 
+export const modifyPassword = (params = {}) => {
+  return request.request({
+    method: 'GET',
+    url: '/sysUser/modifyPassword.corelink',
+    params
+  })
+}
+

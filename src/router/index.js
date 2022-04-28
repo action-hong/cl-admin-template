@@ -108,6 +108,20 @@ export const constantRoutes = [
         meta: { title: '部门管理' }
       }
     ]
+  },
+  {
+    path: '/modifyPassword',
+    component: Layout,
+    redirect: '/modifyPassword/index',
+    hidden: true,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/password/index'),
+        name: '修改密码',
+        meta: { title: '修改密码' }
+      }
+    ]
   }
   // {
   //   path: '/documentation',

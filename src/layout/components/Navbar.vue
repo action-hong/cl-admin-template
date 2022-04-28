@@ -24,6 +24,9 @@
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item @click.native="goPassword">
+            <span style="display:block;">重置密码</span>
+          </el-dropdown-item>
           <!-- <router-link to="/profile/index">
             <el-dropdown-item>Profile</el-dropdown-item>
           </router-link>
@@ -77,6 +80,9 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+    goPassword() {
+      this.$router.push('/modifyPassword')
     }
   }
 }
