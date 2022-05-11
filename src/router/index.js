@@ -5,7 +5,7 @@ Vue.use(Router)
 
 /* Layout */
 import Layout from '@/layout'
-import { PERMISSION_DEPT, PERMISSION_SYSTEM_USER } from '@/constants/permission'
+import { PERMISSION_DEPT, PERMISSION_ROLES, PERMISSION_SYSTEM_USER } from '@/constants/permission'
 
 /* Router Modules */
 // import componentsRouter from './modules/components'
@@ -166,14 +166,23 @@ export const asyncRoutes = [
     path: '/common',
     component: Layout,
     redirect: '/common/index',
-    meta: { title: '通用', icon: 'lock' },
+    meta: {
+      title: '通用',
+      icon: 'lock',
+      roles: [
+        ...PERMISSION_ROLES,
+        ...PERMISSION_DEPT,
+        ...PERMISSION_SYSTEM_USER
+      ]
+    },
     children: [
       {
         path: 'role',
         component: () => import('@/views/permission/role'),
         name: 'Role',
         meta: {
-          title: '角色管理'
+          title: '角色管理',
+          roles: PERMISSION_ROLES
         }
       },
       {

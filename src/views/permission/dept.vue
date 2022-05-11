@@ -88,12 +88,17 @@
           prop="telephone"
           label="电话"
         />
-        <el-table-column label="操作" width="150">
+        <el-table-column label="操作" width="240">
           <template slot-scope="scope">
             <el-button
               size="mini"
               @click="handleEditUser(scope.row)"
             >编辑</el-button>
+            <el-divider direction="vertical" />
+            <el-button
+              size="mini"
+              @click="handleEnableUser(scope.row)"
+            >{{ scope.row.status == 2 ? '启用' : '禁用' }}</el-button>
             <el-divider direction="vertical" />
             <el-popconfirm
               title="是否重置密码?"
@@ -418,6 +423,16 @@ export default {
         }
       })
     },
+    handleEnableUser(row) {
+      const status = row.status === 2 ? 1 : 2
+      updateUser({
+        ...row,
+        deptId: row.deptKeyid,
+        status
+      }).then(_ => {
+        this.fetchDeptUser()
+      })
+    },
     findParent(list, id) {
       for (let i = 0; i < list.length; i++) {
         if (list[i].id === id) {
@@ -445,6 +460,13 @@ export default {
           }).then(response => {
             this.fetchDeptUser()
             this.dialogUserFromVisiable = false
+            if (!this.isEdit) {
+              this.$notify({
+                message: '创建成功，密码为: ' + response.data.password,
+                duration: 0,
+                type: 'success'
+              })
+            }
           }).finally(_ => {
             this.submiting = false
           })

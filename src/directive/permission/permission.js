@@ -1,9 +1,7 @@
 import store from '@/store'
-// import * as ALL from '@/constants/permission'
 
 function checkPermission(el, binding) {
   const { value } = binding
-  // value = ALL[value]
   const roles = store.getters && store.getters.roles
 
   if (value) {

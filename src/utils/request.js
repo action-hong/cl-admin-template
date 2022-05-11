@@ -70,11 +70,6 @@ service.interceptors.response.use(
   },
   error => {
     console.log('err' + error) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
     if (error.request.status === 438) {
       MessageBox.confirm('你已经退出登录了，请重新登录', '确认登出', {
         confirmButtonText: '重新登录',
@@ -85,7 +80,14 @@ service.interceptors.response.use(
           location.reload()
         })
       })
+    } else if (error.request.status === 439) {
+      error.message = '用户没有该权限，请联系管理员配置'
     }
+    Message({
+      message: error.message,
+      type: 'error',
+      duration: 5 * 1000
+    })
     return Promise.reject(error)
   }
 )
