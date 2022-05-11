@@ -7,14 +7,14 @@
     >
       <div>
         <el-button
-          v-permission="$data.$clPermission.PERMISSION_CODE_ADD_DEPT"
+          :disabled="!checkPermission($data.$clPermission.PERMISSION_CODE_ADD_DEPT)"
           type="primary"
           @click="handleCreateDept"
         >
           新增部门
         </el-button>
         <el-button
-          v-permission="$data.$clPermission.PERMISSION_CODE_ADD_SYSTEM_USER"
+          :disabled="!checkPermission($data.$clPermission.PERMISSION_CODE_ADD_SYSTEM_USER)"
           type="primary"
           @click="handleCreateUser"
         >
@@ -41,24 +41,24 @@
         />
         <el-table-column label="操作" width="150">
           <template slot-scope="scope">
-            <template
-              v-permission="$data.$clPermission.PERMISSION_CODE_EDIT_DEPT"
-            >
-              <el-button
-                size="mini"
-                @click="handleEditDept(scope.row)"
-              >编辑</el-button>
-              <el-divider direction="vertical" />
-            </template>
+            <el-button
+              size="mini"
+              :disabled="!checkPermission($data.$clPermission.PERMISSION_CODE_EDIT_DEPT)"
+              @click.native.stop="handleEditDept(scope.row)"
+            >编辑</el-button>
+            <el-divider
+              direction="vertical"
+            />
             <el-popconfirm
-              v-permission="$data.$clPermission.PERMISSION_CODE_REMOVE_DEPT"
               title="确定删除吗?"
               @onConfirm="handleDeleteDept(scope.row)"
             >
               <el-button
                 slot="reference"
+                :disabled="!checkPermission($data.$clPermission.PERMISSION_CODE_REMOVE_DEPT)"
                 size="mini"
                 type="danger"
+                @click.native.stop
               >删除</el-button>
             </el-popconfirm>
           </template>
@@ -91,21 +91,28 @@
         <el-table-column label="操作" width="240">
           <template slot-scope="scope">
             <el-button
+              :disabled="!checkPermission($data.$clPermission.PERMISSION_CODE_EDIT_SYSTEM_USER)"
               size="mini"
               @click="handleEditUser(scope.row)"
             >编辑</el-button>
-            <el-divider direction="vertical" />
+            <el-divider
+              direction="vertical"
+            />
             <el-button
+              :disabled="!checkPermission($data.$clPermission.PERMISSION_CODE_EDIT_SYSTEM_USER)"
               size="mini"
               @click="handleEnableUser(scope.row)"
             >{{ scope.row.status == 2 ? '启用' : '禁用' }}</el-button>
-            <el-divider direction="vertical" />
+            <el-divider
+              direction="vertical"
+            />
             <el-popconfirm
               title="是否重置密码?"
               @onConfirm="handleResetPassword(scope.row)"
             >
               <el-button
                 slot="reference"
+                :disabled="!checkPermission($data.$clPermission.PERMISSION_CODE_RESET_SYSTEM_USER)"
                 size="mini"
                 type="danger"
               >重置</el-button>

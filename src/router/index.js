@@ -165,7 +165,7 @@ export const asyncRoutes = [
   {
     path: '/common',
     component: Layout,
-    redirect: '/common/index',
+    redirect: '/common/role',
     meta: {
       title: '通用',
       icon: 'lock',

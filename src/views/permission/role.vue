@@ -7,6 +7,7 @@
     >
       <div>
         <el-button
+          :disabled="!checkPermission($data.$clPermission.PERMISSION_CODE_ADD_ROLE)"
           type="primary"
           @click="handleCreateRole"
         >
@@ -29,6 +30,7 @@
         <el-table-column label="操作" width="80">
           <template slot-scope="scope">
             <el-button
+              :disabled="!checkPermission($data.$clPermission.PERMISSION_CODE_EDIT_ROLE)"
               size="mini"
               @click="handleEditRole(scope.row)"
             >编辑</el-button>
@@ -66,6 +68,7 @@
             </span>
           </el-tree>
           <el-button
+            :disabled="!checkPermission($data.$clPermission.PERMISSION_CODE_CHANGE_ROLE_ACLS)"
             style="margin-top: 15px;"
             type="primary"
             @click="updateRoleAcl"
@@ -93,6 +96,7 @@
             }"
           />
           <el-button
+            :disabled="!checkPermission($data.$clPermission.PERMISSION_CODE_CHANGE_ROLE_USERS)"
             style="margin-top: 15px;"
             type="primary"
             @click="updateRoleUsers"

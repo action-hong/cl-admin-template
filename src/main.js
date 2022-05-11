@@ -24,6 +24,7 @@ import * as filters from './filters' // global filters
 import * as clPermission from './constants/permission'
 
 import permission from './directive/permission'
+import checkPermission from '@/utils/permission'
 
 /**
  * If you don't want to use mock-server
@@ -58,6 +59,9 @@ Vue.mixin({
         ...clPermission
       }
     }
+  },
+  methods: {
+    checkPermission
   }
 })
 
