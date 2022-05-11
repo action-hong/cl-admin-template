@@ -356,4 +356,13 @@ export function removeClass(ele, cls) {
   }
 }
 
+export function downloadData(data, filename) {
+  // download string filename
+  const blob = new Blob([data], { type: 'text/plain' })
+  const link = document.createElement('a')
+  link.download = filename
+  link.href = window.URL.createObjectURL(blob)
+  link.click()
+}
+
 export * from './permission'

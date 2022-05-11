@@ -5,6 +5,7 @@ Vue.use(Router)
 
 /* Layout */
 import Layout from '@/layout'
+import { PERMISSION_DEPT, PERMISSION_SYSTEM_USER } from '@/constants/permission'
 
 /* Router Modules */
 // import componentsRouter from './modules/components'
@@ -84,32 +85,6 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/permission',
-    component: Layout,
-    redirect: '/permission/index',
-    meta: { title: '权限', icon: 'lock' },
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/permission/index'),
-        name: 'Permission',
-        meta: { title: '权限管理' }
-      },
-      {
-        path: 'role',
-        component: () => import('@/views/permission/role'),
-        name: 'Role',
-        meta: { title: '角色管理' }
-      },
-      {
-        path: 'dept',
-        component: () => import('@/views/permission/dept'),
-        name: 'Dept',
-        meta: { title: '部门管理' }
-      }
-    ]
-  },
-  {
     path: '/modifyPassword',
     component: Layout,
     redirect: '/modifyPassword/index',
@@ -164,11 +139,57 @@ export const constantRoutes = [
   // }
 ]
 
+// 开发模式下才有这个
+if (process.env.NODE_ENV === 'development') {
+  constantRoutes.push({
+    path: '/permission',
+    component: Layout,
+    redirect: '/permission/index',
+    meta: { title: '权限', icon: 'lock' },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/permission/index'),
+        name: 'Permission',
+        meta: { title: '权限管理' }
+      }
+    ]
+  })
+}
+
 /**
  * asyncRoutes
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
+  {
+    path: '/common',
+    component: Layout,
+    redirect: '/common/index',
+    meta: { title: '通用', icon: 'lock' },
+    children: [
+      {
+        path: 'role',
+        component: () => import('@/views/permission/role'),
+        name: 'Role',
+        meta: {
+          title: '角色管理'
+        }
+      },
+      {
+        path: 'dept',
+        component: () => import('@/views/permission/dept'),
+        name: 'Dept',
+        meta: {
+          title: '部门管理',
+          roles: [
+            ...PERMISSION_DEPT,
+            ...PERMISSION_SYSTEM_USER
+          ]
+        }
+      }
+    ]
+  },
   // {
   //   path: '/icon',
   //   component: Layout,

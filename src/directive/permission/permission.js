@@ -1,23 +1,26 @@
 import store from '@/store'
+// import * as ALL from '@/constants/permission'
 
 function checkPermission(el, binding) {
   const { value } = binding
+  // value = ALL[value]
   const roles = store.getters && store.getters.roles
 
-  if (value && value instanceof Array) {
-    if (value.length > 0) {
-      const permissionRoles = value
+  if (value) {
+    const permissionRoles = value
 
-      const hasPermission = roles.some(role => {
+    const hasPermission = roles.some(role => {
+      if (Array.isArray(permissionRoles)) {
         return permissionRoles.includes(role)
-      })
-
-      if (!hasPermission) {
-        el.parentNode && el.parentNode.removeChild(el)
       }
+      return permissionRoles === role
+    })
+
+    if (!hasPermission) {
+      el.parentNode && el.parentNode.removeChild(el)
     }
   } else {
-    throw new Error(`need roles! Like v-permission="['admin','editor']"`)
+    throw new Error(`not found permission code with ${binding.value}`)
   }
 }
 

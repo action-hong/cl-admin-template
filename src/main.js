@@ -20,6 +20,11 @@ import './utils/error-log' // error log
 
 import * as filters from './filters' // global filters
 
+// permission constant
+import * as clPermission from './constants/permission'
+
+import permission from './directive/permission'
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -44,6 +49,21 @@ Object.keys(filters).forEach(key => {
 })
 
 Vue.config.productionTip = false
+
+Vue.mixin({
+  data: function() {
+    return {
+      isDev: process.env.NODE_ENV === 'development',
+      $clPermission: {
+        ...clPermission
+      }
+    }
+  }
+})
+
+console.log('==> clPermission', clPermission)
+
+Vue.use(permission)
 
 new Vue({
   el: '#app',

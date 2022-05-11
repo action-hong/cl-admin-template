@@ -7,12 +7,14 @@
     >
       <div>
         <el-button
+          v-permission="$data.$clPermission.PERMISSION_CODE_ADD_DEPT"
           type="primary"
           @click="handleCreateDept"
         >
           新增部门
         </el-button>
         <el-button
+          v-permission="$data.$clPermission.PERMISSION_CODE_ADD_SYSTEM_USER"
           type="primary"
           @click="handleCreateUser"
         >
@@ -39,18 +41,24 @@
         />
         <el-table-column label="操作" width="150">
           <template slot-scope="scope">
-            <el-button
-              size="mini"
-              @click="handleEditDept(scope.row)"
-            >编辑</el-button>
-            <el-divider direction="vertical" />
+            <template
+              v-permission="$data.$clPermission.PERMISSION_CODE_EDIT_DEPT"
+            >
+              <el-button
+                size="mini"
+                @click="handleEditDept(scope.row)"
+              >编辑</el-button>
+              <el-divider direction="vertical" />
+            </template>
             <el-popconfirm
+              v-permission="$data.$clPermission.PERMISSION_CODE_REMOVE_DEPT"
               title="确定删除吗?"
               @onConfirm="handleDeleteDept(scope.row)"
             >
               <el-button
                 slot="reference"
                 size="mini"
+                type="danger"
               >删除</el-button>
             </el-popconfirm>
           </template>

@@ -37,12 +37,26 @@
             prop="name"
             label="模块名称"
           />
-          <el-table-column label="操作" width="80">
+          <el-table-column label="操作" width="150">
             <template slot-scope="scope">
               <el-button
                 size="mini"
-                @click="handleModuleEdit(scope.$index, scope.row)"
+                @click.stop="handleModuleEdit(scope.$index, scope.row)"
               >编辑</el-button>
+              <el-divider
+                direction="vertical"
+              />
+              <el-popconfirm
+                title="是否删除该权限模块?"
+                @onConfirm="handleModuleDelete(scope.row)"
+              >
+                <el-button
+                  slot="reference"
+                  size="mini"
+                  type="danger"
+                  @click.native.stop
+                >删除</el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -214,7 +228,7 @@
 </template>
 
 <script>
-import { getSysAclModuletree, updateSysAclModule, saveSysAclModule, getPageByAclmodulekeyid, updateACL, saveACL } from '@/api'
+import { getSysAclModuletree, updateSysAclModule, saveSysAclModule, getPageByAclmodulekeyid, updateACL, saveACL, deletesysAclModule } from '@/api'
 import { resolveACLModule } from '@/utils'
 export default {
   components: {},
@@ -372,6 +386,16 @@ export default {
           ...row,
           classify: [...row.classify]
         }
+      })
+    },
+    handleModuleDelete(row) {
+      this.loading = true
+      deletesysAclModule({
+        aclModuleKeyid: row.id
+      }).then(() => {
+        this.fetchList()
+      }).finally(_ => {
+        this.loading = false
       })
     },
     createOrEditModule() {

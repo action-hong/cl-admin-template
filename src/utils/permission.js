@@ -29,9 +29,24 @@ export function flapPermissions(list, res = []) {
   if (list && list.length > 0) {
     list.forEach((item) => {
       item.aclList.forEach((acl) => {
-        res.push(acl.url)
+        res.push(acl.code)
       })
       flapPermissions(item.aclModuleList, res)
+    })
+  }
+  return res
+}
+
+export function flapPermissionsWith(list, res = []) {
+  if (list && list.length > 0) {
+    list.forEach((item) => {
+      item.aclList.forEach((acl) => {
+        res.push({
+          name: acl.name,
+          code: acl.code
+        })
+      })
+      flapPermissionsWith(item.aclModuleList, res)
     })
   }
   return res

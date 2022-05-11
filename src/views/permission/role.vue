@@ -70,6 +70,12 @@
             type="primary"
             @click="updateRoleAcl"
           >更新权限</el-button>
+          <el-button
+            v-if="isDev"
+            style="margin-top: 15px;"
+            type="primary"
+            @click="exportRoleAcl"
+          >导出权限</el-button>
         </el-tab-pane>
         <el-tab-pane
           v-loading="loadingRoleUser"
@@ -131,7 +137,7 @@
 
 <script>
 import { changeRoleAcls, changeRoleUsers, getRolelist, getRoleTree, getRoleUsers, saveRole, updateRole } from '@/api'
-import { resolveModuleForTree, getRoleAcl, getAllAcl } from '@/utils'
+import { resolveModuleForTree, getRoleAcl, getAllAcl, downloadData, flapPermissionsWith } from '@/utils'
 
 export default {
   components: {},
@@ -308,6 +314,10 @@ export default {
     resetRoleUsers() {
       if (this.loadingRoleUser) return
       this.currentRoleUsers = [...this.tempRolueUsers]
+    },
+    exportRoleAcl() {
+      const data = JSON.stringify(flapPermissionsWith(this.roleAclTree), null, 2)
+      downloadData(data, '角色权限.json')
     }
   }
 
